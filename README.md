@@ -62,7 +62,7 @@ this.load.pack("preloader", "assets/preloader-pack.json?h=7e8b50fa0c74d225fbee")
 Install:
 
 ```bash
-npm install phaser-asset-pack-hashing --save-dev
+npm install -g phaser-asset-pack-hashing
 ```
 
 Run the script with the `--root` (alias `-r`) option (required):

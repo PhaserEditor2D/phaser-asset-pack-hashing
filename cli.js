@@ -45,8 +45,6 @@ if (args["help"] || args["root"] === undefined) {
 const rootDir = args["root"]
 const processJs = args["js"]
 
-console.log(rootDir)
-
 if (!existsSync(rootDir)) {
 
     console.log(`File not found '${rootDir}'.`)
