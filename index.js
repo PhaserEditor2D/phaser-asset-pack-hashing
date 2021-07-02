@@ -72,7 +72,7 @@ export class PackTransformer {
 
                 if (content !== newContent) {
 
-                    console.log(`Writing ${relative(this.#rootDir, fullName)}`)
+                    console.log(`- Writing JS ${relative(this.#rootDir, fullName)}`)
 
                     writeFileSync(fullName, newContent)
                 }
@@ -153,7 +153,7 @@ export class PackTransformer {
                                     textureData.image = newImageName
                                 }
 
-                                console.log(`  Writing Multiatlas '${relative(this.#rootDir, atlasJsonFile)}'`)
+                                console.log(`  * Writing Multiatlas '${relative(this.#rootDir, atlasJsonFile)}'`)
 
                                 writeFileSync(atlasJsonFile, JSON.stringify(atlasData))
                             }
@@ -175,7 +175,7 @@ export class PackTransformer {
                         }
                     }
 
-                    console.log(`Writing Pack '${relative(this.#rootDir, fullName)}'`)
+                    console.log(`- Writing Pack '${relative(this.#rootDir, fullName)}'`)
 
                     writeFileSync(fullName, JSON.stringify(packData))
                 }

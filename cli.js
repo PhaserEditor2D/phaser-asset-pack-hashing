@@ -1,25 +1,64 @@
 #!/usr/bin/env node
 
 import { existsSync, readdirSync, readFileSync, statSync } from "fs"
-import { argv } from "process"
-import { PackTransformer } from "./lib.js"
+import { argv, exit } from "process"
+import { PackTransformer } from "./index.js"
+import commandLineArgs from "command-line-args"
+import commandLineUsage from "command-line-usage"
 
-const [, , rootDir] = argv
+const args = commandLineArgs([
+    { name: "root", alias: "r", type: String, multiple: false },
+    { name: "js", alias: "j", type: Boolean, defaultValue: false },
+    { name: "help", alias: "h", type: Boolean, defaultValue: false }
+])
 
-if (!rootDir) {
+if (args["help"] || args["root"] === undefined) {
 
-    console.log("Missing root directory.")
+    const usage = commandLineUsage([{
+        header: "Phaser Asset Pack Hashing",
+        content: "A script for hashing the URLs of Asset Pack files."
+    }, {
+        header: "Options",
+        optionList: [
+            {
+                name: "root",
+                alias: "r",
+                typeLabel: "<directory>",
+                description: "Root directory of the game."
+            },
+            {
+                name: "js",
+                alias: "j",
+                type: {
+                    name: "boolean",
+                },
+                description: "Enable JavaScript processing."
+            }
+        ]
+    }])
 
-    process.exit()
+    console.log(usage)
+
+    exit(0)
 }
+
+const rootDir = args["root"]
+const processJs = args["js"]
+
+console.log(rootDir)
 
 if (!existsSync(rootDir)) {
 
     console.log(`File not found '${rootDir}'.`)
+
+    exit(1)
 }
 
 const transformer = new PackTransformer(rootDir)
 
 await transformer.start()
 
-await transformer.replacePackUrlInJavaScriptFiles();
+if (processJs) {
+
+    await transformer.replacePackUrlInJavaScriptFiles()
+}

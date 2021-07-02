@@ -18,10 +18,14 @@
   "author": "Arian Fornaris <developers@phasereditor2d.com> (https://phasereditor2d.com/)",
   "license": "MIT",
   "devDependencies": {
+    "@types/command-line-args": "^5.0.0",
+    "@types/command-line-usage": "^5.0.1",
     "@types/md5-file": "^5.0.0",
     "@types/node": "^15.12.5"
   },
   "dependencies": {
+    "command-line-args": "^5.1.1",
+    "command-line-usage": "^6.1.1",
     "md5-file": "^5.0.0"
   }
 }
