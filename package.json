@@ -1,9 +1,10 @@
 {
   "type": "module",
-  "name": "asset-pack-hashing",
+  "name": "phaser-asset-pack-hashing",
   "version": "1.0.0",
   "description": "A script for making a Phaser Asset Pack file ready for production.",
-  "main": "cli.js",
+  "main": "index.js",
+  "bin": "cli.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,9 +12,7 @@
     "phaser",
     "assets",
     "pack",
-    "phaser",
-    "editor",
-    "2d"
+    "phaser editor 2d"
   ],
   "author": "Arian Fornaris <developers@phasereditor2d.com> (https://phasereditor2d.com/)",
   "license": "MIT",
