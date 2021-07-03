@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "phaser-asset-pack-hashing",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A script for making a Phaser Asset Pack file ready for production.",
   "repository": "github:PhaserEditor2D/phaser-asset-pack-hashing",
   "main": "index.js",
