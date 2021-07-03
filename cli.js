@@ -2,7 +2,7 @@
 
 import { existsSync, readdirSync, readFileSync, statSync } from "fs"
 import { argv, exit } from "process"
-import { PackTransformer } from "./index.js"
+import { AssetPackProcessor } from "./index.js"
 import commandLineArgs from "command-line-args"
 import commandLineUsage from "command-line-usage"
 
@@ -52,11 +52,7 @@ if (!existsSync(rootDir)) {
     exit(1)
 }
 
-const transformer = new PackTransformer(rootDir)
+const processor = new AssetPackProcessor(rootDir)
 
-await transformer.start()
+await processor.start(processJs)
 
-if (processJs) {
-
-    await transformer.replacePackUrlInJavaScriptFiles()
-}

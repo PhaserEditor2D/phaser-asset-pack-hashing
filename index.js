@@ -3,7 +3,7 @@ import { join, relative } from "path";
 import { exit } from "process";
 import md5FileSync from "md5-file";
 
-export class PackTransformer {
+export class AssetPackProcessor {
 
     /** @type {string} */
     #rootDir;
@@ -21,16 +21,21 @@ export class PackTransformer {
         this.#packUrls = [];
     }
 
-    async start() {
+    async start(processJs) {
 
         console.log("")
         console.log("# Processing Asset Pack files")
         console.log("")
 
-        await this.#processPackFiles(this.#rootDir)
+        await this.#processDirectory(this.#rootDir)
+
+        if (processJs) {
+            
+            await this.#processJavaScriptFiles()
+        }
     }
 
-    async replacePackUrlInJavaScriptFiles() {
+    async #processJavaScriptFiles() {
 
         console.log("")
         console.log("# Processing JavaScript files")
@@ -43,7 +48,7 @@ export class PackTransformer {
 
         const hashMap = new Map()
 
-        for(const url of this.#packUrls) {
+        for (const url of this.#packUrls) {
 
             const hash = await md5FileSync(join(this.#rootDir, url))
             hashMap.set(url, hash)
@@ -80,17 +85,22 @@ export class PackTransformer {
         }
     }
 
-    async #processPackFiles(currentDir) {
+    /**
+     * Scan the given directory for pack files and process them.
+     * 
+     * @param {string} dir 
+     */
+    async #processDirectory(dir) {
 
-        for (const name of readdirSync(currentDir)) {
+        for (const name of readdirSync(dir)) {
 
-            const fullName = join(currentDir, name)
+            const fullName = join(dir, name)
 
             const stat = statSync(fullName)
 
             if (stat.isDirectory()) {
 
-                await this.#processPackFiles(fullName)
+                await this.#processDirectory(fullName)
 
             } else {
 
@@ -121,57 +131,30 @@ export class PackTransformer {
 
                         for (const config of packData[sectionKey].files) {
 
-                            const { key, type } = config;
+                            const { type } = config;
 
                             if (type === "multiatlas") {
 
-                                const path = config.path
-                                const atlasJsonFile = join(this.#rootDir, config.url)
-
-                                if (this.#visited.has(atlasJsonFile)) {
-
-                                    continue
-                                }
-
-                                this.#visited.add(atlasJsonFile)
-
-                                const atlasData = JSON.parse(readFileSync(atlasJsonFile))
-
-                                for (const textureData of atlasData.textures) {
-
-                                    const imageName = textureData.image
-                                    const imageFile = join(this.#rootDir, path, imageName)
-
-                                    if (!existsSync(imageFile)) {
-
-                                        throw new Error(`File not found '${imageFile}'`)
-                                    }
-
-                                    const hash = await md5FileSync(imageFile)
-                                    const newImageName = `${imageName}?h=${hash}`
-
-                                    textureData.image = newImageName
-                                }
-
-                                console.log(`  * Writing Multiatlas '${relative(this.#rootDir, atlasJsonFile)}'`)
-
-                                writeFileSync(atlasJsonFile, JSON.stringify(atlasData))
+                                await this.#processMultiAtlas(config)
                             }
 
-                            if (config.url) {
+                            await this.#processConfigField(config, "url")
 
-                                config.url = await this.#processSimpleUrl(config.url)
-                            }
+                            await this.#processConfigField(config, "urls")
 
-                            if (config.atlasURL) {
+                            await this.#processConfigField(config, "atlasURL")
 
-                                config.atlasURL = await this.#processSimpleUrl(config.url)
-                            }
+                            await this.#processConfigField(config, "textureURL")
 
-                            if (config.textureURL) {
+                            await this.#processConfigField(config, "fontDataURL")
 
-                                config.atlasURL = await this.#processSimpleUrl(config.url)
-                            }
+                            await this.#processConfigField(config, "jsonURL")
+
+                            await this.#processConfigField(config, "audioURL")
+
+                            await this.#processConfigField(config, "objURL")
+
+                            await this.#processConfigField(config, "matURL")
                         }
                     }
 
@@ -183,7 +166,75 @@ export class PackTransformer {
         }
     }
 
-    async #processSimpleUrl(url) {
+    async #processMultiAtlas(config) {
+
+        const path = config.path
+        const atlasJsonFile = join(this.#rootDir, config.url)
+
+        if (this.#visited.has(atlasJsonFile)) {
+
+            return
+        }
+
+        this.#visited.add(atlasJsonFile)
+
+        const atlasData = JSON.parse(readFileSync(atlasJsonFile))
+
+        for (const textureData of atlasData.textures) {
+
+            const imageName = textureData.image
+            const imageFile = join(this.#rootDir, path, imageName)
+
+            if (!existsSync(imageFile)) {
+
+                throw new Error(`File not found '${imageFile}'`)
+            }
+
+            const hash = await md5FileSync(imageFile)
+            const newImageName = `${imageName}?h=${hash}`
+
+            textureData.image = newImageName
+        }
+
+        console.log(`  * Writing MultiAtlas '${relative(this.#rootDir, atlasJsonFile)}'`)
+
+        writeFileSync(atlasJsonFile, JSON.stringify(atlasData))
+    }
+
+    /**
+     * Convert a field of an entry configuration.
+     * 
+     * @param {any} config 
+     * @param {string} field 
+     */
+    async #processConfigField(config, field) {
+
+        const url_urls = config[field]
+
+        if (typeof url_urls === "string") {
+
+            config[field] = await this.#convertUrl(url_urls)
+
+        } if (Array.isArray(url_urls)) {
+
+            const urls = []
+
+            for (const u of url_urls) {
+
+                urls.push(await this.#convertUrl(u))
+            }
+
+            config[field] = urls
+        }
+    }
+
+    /**
+     * Appends the hash to the url.
+     * 
+     * @param {string} url 
+     * @returns {Promise<string>} The url plush a its content hash.
+     */
+    async #convertUrl(url) {
 
         const file = join(this.#rootDir, url)
 
