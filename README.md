@@ -2,7 +2,7 @@
 
 A script for hashing the Phaser Asset Pack files, making them ready for production.
 
-The Asset Pack Files are a key part of Phaser Editor 2D.
+The Asset Pack Files are a key part of [Phaser Editor 2D](https://phasereditor2d.com).
 
 ## Motivation
 
@@ -25,7 +25,7 @@ For example, if yo have an Asset Pack File like this:
 }
 ```
 
-Is modified changing the URL of the `background` image:
+The script modifies it changing the URL of the `background` image:
 
 ```json
 {
@@ -41,7 +41,7 @@ Is modified changing the URL of the `background` image:
 }
 ```
 
-Note it added a query string `h=226313014646669c2ee7`.
+Note it adds a query string `h=226313014646669c2ee7`.
 
 Additionally, you can process all JavaScript files and replace the URL of the Asset Pack files for an URL with a hash:
 
@@ -51,7 +51,7 @@ The code:
 this.load.pack("preloader", "assets/preloader-pack.json")
 ```
 
-Is changed to:
+Changes to:
 
 ```js
 this.load.pack("preloader", "assets/preloader-pack.json?h=7e8b50fa0c74d225fbee")
@@ -71,9 +71,9 @@ Run the script with the `--root` (alias `-r`) option (required):
 $ phaser-asset-pack-hashing -r path/to/game/dist/
 ```
 
-It will scan the `path/to/game/dist` folder for Asset Pack files and modify them.
+It scans the `path/to/game/dist` folder for Asset Pack files and modify them.
 
-That's important to highlight that this tool should be applied to the distribution build of your game. You should not modify the Pack Files of your working sources.
+It is important to highlight that this tool should be applied to the distribution build of your game. You should not modify the Pack Files of your working sources.
 
 For enabling the replacement of the Asset Pack files URL in the JavaScript code, use the `--js` (alias `-j`) option:
 
@@ -91,4 +91,3 @@ $ phaser-asset-pack-hashing -h
 ## TODO
 
 * Write a tutorial about using this tool and Webpack.
-* Write a Webpack plugin.
