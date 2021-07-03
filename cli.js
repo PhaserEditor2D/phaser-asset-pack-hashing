@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
 import { existsSync, readdirSync, readFileSync, statSync } from "fs"
-import { argv, exit } from "process"
+import { exit } from "process"
 import { AssetPackProcessor } from "./index.js"
 import commandLineArgs from "command-line-args"
 import commandLineUsage from "command-line-usage"
+
+const VERSION = "1.0.3"
 
 const args = commandLineArgs([
     { name: "root", alias: "r", type: String, multiple: false },
@@ -15,7 +17,7 @@ const args = commandLineArgs([
 if (args["help"] || args["root"] === undefined) {
 
     const usage = commandLineUsage([{
-        header: "Phaser Asset Pack Hashing",
+        header: "Phaser Asset Pack Hashing v" + VERSION,
         content: "A script for hashing the URLs of Asset Pack files."
     }, {
         header: "Options",
