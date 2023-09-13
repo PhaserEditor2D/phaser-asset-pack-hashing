@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "fs";
-import { join, relative } from "path";
+import { dirname, join, relative } from "path";
 import { exit } from "process";
 import md5FileSync from "md5-file";
 
@@ -30,7 +30,7 @@ export class AssetPackProcessor {
         await this.#processDirectory(this.#rootDir)
 
         if (processJs) {
-            
+
             await this.#processJavaScriptFiles()
         }
     }
@@ -136,6 +136,10 @@ export class AssetPackProcessor {
                             if (type === "multiatlas") {
 
                                 await this.#processMultiAtlas(config)
+
+                            } else if (type === "spineAtlas") {
+
+                                this.#processSpineAtlas(config)
                             }
 
                             await this.#processConfigField(config, "url")
@@ -199,6 +203,40 @@ export class AssetPackProcessor {
         console.log(`  * Writing MultiAtlas '${relative(this.#rootDir, atlasJsonFile)}'`)
 
         writeFileSync(atlasJsonFile, JSON.stringify(atlasData))
+    }
+
+    async #processSpineAtlas(config) {
+
+        const atlasFile = join(this.#rootDir, config.url)
+
+        if (this.#visited.has(atlasFile)) {
+
+            return
+        }
+
+        this.#visited.add(atlasFile)
+
+        const atlasContent = readFileSync(atlasFile).toString()
+
+        const lines = atlasContent.split(/\r\n|\r|\n/);
+
+        const imageName = lines[0];
+        const imageFile = join(dirname(atlasFile), imageName);
+
+        if (!existsSync(imageFile)) {
+
+            throw new Error(`File not found '${imageFile}'`)
+        }
+
+        const hash = await md5FileSync(imageFile)
+        const newImageName = `${imageName}?h=${hash}`
+
+        lines[0] = newImageName
+        const output = lines.join("\n")
+
+        console.log(`  * Writing SpineAtlas '${relative(this.#rootDir, atlasFile)}'`)
+
+        writeFileSync(atlasFile, output)
     }
 
     /**
